@@ -124,3 +124,22 @@ publishing {
         // Add repositories to publish to here.
     }
 }
+
+def generatedResources = file("src/main/generated")
+
+loom {
+    runs {
+        data {
+            data()
+            programArgs "--all", "--mod", modid
+            programArgs "--output", generatedResources.absolutePath
+            programArgs "--existing", file("src/main/resources").absolutePath
+        }
+    }
+}
+
+sourceSets {
+    main {
+        resources.srcDir "src/main/generated"
+    }
+}
