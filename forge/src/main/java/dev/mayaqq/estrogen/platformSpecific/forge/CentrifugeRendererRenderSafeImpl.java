@@ -23,9 +23,15 @@ public class CentrifugeRendererRenderSafeImpl {
         FluidStack fluidUp = up.getCapability(ForgeCapabilities.FLUID_HANDLER).map(handler -> handler.getFluidInTank(0)).orElse(null);
         FluidStack fluidDown = down.getCapability(ForgeCapabilities.FLUID_HANDLER).map(handler -> handler.getFluidInTank(0)).orElse(null);
 
+        if (fluidUp.isEmpty() && fluidDown.isEmpty()) return;
+
         ms.pushPose();
-        FluidRenderer.renderFluidBox(fluidDown, 0.01F, 0.01F, 0.01F, 0.99F, 0.3F, 0.99F, buffer, ms, light, false);
-        FluidRenderer.renderFluidBox(fluidUp, 0.01F, 0.71F, 0.01F, 0.99F, 0.97F, 0.99F, buffer, ms, light, false);
+        if (fluidDown.isEmpty() && fluidDown != null) {
+            FluidRenderer.renderFluidBox(fluidDown, 0.01F, 0.01F, 0.01F, 0.99F, 0.3F, 0.99F, buffer, ms, light, false);
+        }
+        if (fluidUp.isEmpty() && fluidUp != null) {
+            FluidRenderer.renderFluidBox(fluidUp, 0.01F, 0.71F, 0.01F, 0.99F, 0.97F, 0.99F, buffer, ms, light, false);
+        }
         ms.popPose();
     }
 }
