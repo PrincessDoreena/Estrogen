@@ -56,10 +56,18 @@ dependencies {
 }
 
 processResources {
+    Project common = project(":common")
+
     inputs.property "version", project.version
 
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version
+    }
+
+    copy {
+        from common.file("src/main/generated/data/estrogen/recipes/.forge")
+        include "**/*.json"
+        into "src/main/generated/data/estrogen/recipes/"
     }
 }
 

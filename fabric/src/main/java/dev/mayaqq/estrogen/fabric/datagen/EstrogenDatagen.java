@@ -8,6 +8,8 @@ import dev.mayaqq.estrogen.fabric.datagen.tags.EstrogenTags;
 import dev.mayaqq.estrogen.fabric.datagen.translations.EstrogenTranslations;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator.Pack.Factory;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 
 public class EstrogenDatagen implements DataGeneratorEntrypoint {
@@ -19,7 +21,8 @@ public class EstrogenDatagen implements DataGeneratorEntrypoint {
         pack.addProvider(EstrogenCentrifugingRecipes::new);
         pack.addProvider(EstrogenCraftingRecipes::new);
         pack.addProvider(EstrogenCompactingRecipes::new);
-        pack.addProvider(EstrogenEmptyingRecipes::new);
+        pack.addProvider((Factory<EstrogenEmptyingRecipes>) EstrogenEmptyingRecipes::createFabric);
+        pack.addProvider((Factory<EstrogenEmptyingRecipes>) EstrogenEmptyingRecipes::createForge);
         pack.addProvider(EstrogenFillingRecipes::new);
         pack.addProvider(EstrogenMillingRecipes::new);
         pack.addProvider(EstrogenSandpaperPolishingRecipes::new);

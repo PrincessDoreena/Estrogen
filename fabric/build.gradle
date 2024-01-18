@@ -69,11 +69,19 @@ dependencies {
 }
 
 processResources {
+    Project common = project(":common")
+
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
+    copy {
+        from common.file("src/main/generated/data/estrogen/recipes/.fabric")
+        include "**/*.json"
+        into "src/main/generated/data/estrogen/recipes/"
+    }
+
 }
 
 shadowJar {
@@ -126,6 +134,7 @@ loom {
             vmArg "-Dporting_lib.datagen.existing_resources=${common.file("src/main/resources")}"
 
             runDir "build/datagen"
+
         }
     }
 }
