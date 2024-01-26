@@ -11,6 +11,7 @@ import dev.mayaqq.estrogen.utils.PlayerLookup;
 import dev.mayaqq.estrogen.utils.Time;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,41 +54,43 @@ public class EstrogenEffect extends MobEffect {
 
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
-        if (!EstrogenConfig.server().dashEnabled.get()) return;
-        dashCooldown--;
-        groundCooldown--;
-        if (dashCooldown < 0) dashCooldown = 0;
-        if (groundCooldown < 0) groundCooldown = 0;
+        if (entity instanceof LocalPlayer) {
+            if (!EstrogenConfig.server().dashEnabled.get()) return;
+            dashCooldown--;
+            groundCooldown--;
+            if (dashCooldown < 0) dashCooldown = 0;
+            if (groundCooldown < 0) groundCooldown = 0;
 
-        // Dash particles
-        if (dashCooldown > 0 && dashCooldown % 2 == 0 && entity.blockPosition() != lastPos) {
-            NetworkManager.sendToServer(EstrogenC2S.DASH_PARTICLES, new FriendlyByteBuf(Unpooled.buffer()));
-        }
-        lastPos = entity.blockPosition();
-
-        // Wave dash
-        if (entity instanceof Player player && player.level().isClientSide) {
-            Minecraft client = Minecraft.getInstance();
-            if (dashCooldown > 0 && shouldWaveDash && client.options.keyJump.isDown()) {
-                player.setDeltaMovement(player.getLookAngle().x * 3, 1, player.getLookAngle().z * 3);
-                shouldWaveDash = false;
+            // Dash particles
+            if (dashCooldown > 0 && dashCooldown % 2 == 0 && entity.blockPosition() != lastPos) {
+                NetworkManager.sendToServer(EstrogenC2S.DASH_PARTICLES, new FriendlyByteBuf(Unpooled.buffer()));
             }
+            lastPos = entity.blockPosition();
 
-            // Whole Dash Mechanic
-            if (shouldRefreshDash(player) && groundCooldown == 0) {
-                groundCooldown = 4;
-                currentDashes = (short) player.getAttributeValue(EstrogenAttributes.DASH_LEVEL.get());
-            }
-            onCooldown = dashCooldown > 0 || currentDashes == 0;
-            Dash.onCooldown = onCooldown;
-            if (EstrogenKeybinds.dashKey.consumeClick() && !onCooldown) {
-                if (player.getXRot() > 50 && player.getXRot() < 90) {
-                    shouldWaveDash = true;
+            // Wave dash
+            if (entity instanceof Player player && player.level().isClientSide) {
+                Minecraft client = Minecraft.getInstance();
+                if (dashCooldown > 0 && shouldWaveDash && client.options.keyJump.isDown()) {
+                    player.setDeltaMovement(player.getLookAngle().x * 3, 1, player.getLookAngle().z * 3);
+                    shouldWaveDash = false;
                 }
-                dashCooldown = 10;
-                currentDashes--;
-                player.setDeltaMovement(player.getLookAngle().x * 2, player.getLookAngle().y * 2, player.getLookAngle().z * 2);
-                NetworkManager.sendToServer(EstrogenC2S.DASH, new FriendlyByteBuf(Unpooled.buffer()));
+
+                // Whole Dash Mechanic
+                if (shouldRefreshDash(player) && groundCooldown == 0) {
+                    groundCooldown = 4;
+                    currentDashes = (short) player.getAttributeValue(EstrogenAttributes.DASH_LEVEL.get());
+                }
+                onCooldown = dashCooldown > 0 || currentDashes == 0;
+                Dash.onCooldown = onCooldown;
+                if (EstrogenKeybinds.dashKey.consumeClick() && !onCooldown) {
+                    if (player.getXRot() > 50 && player.getXRot() < 90) {
+                        shouldWaveDash = true;
+                    }
+                    dashCooldown = 10;
+                    currentDashes--;
+                    player.setDeltaMovement(player.getLookAngle().x * 2, player.getLookAngle().y * 2, player.getLookAngle().z * 2);
+                    NetworkManager.sendToServer(EstrogenC2S.DASH, new FriendlyByteBuf(Unpooled.buffer()));
+                }
             }
         }
     }
@@ -102,7 +105,9 @@ public class EstrogenEffect extends MobEffect {
             entity.getAttribute(EstrogenAttributes.DASH_LEVEL.get()).removeModifier(DASH_MODIFIER_UUID);
         }
 
-        resetDash(entity);
+        if (entity instanceof LocalPlayer) {
+            resetDash(entity);
+        }
 
         if (!entity.hasEffect(ESTROGEN_EFFECT) && entity instanceof Player) {
             entity.getAttribute(BOOB_INITIAL_SIZE.get()).setBaseValue(0.0);
