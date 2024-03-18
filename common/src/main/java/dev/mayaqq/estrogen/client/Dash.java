@@ -39,7 +39,7 @@ public class Dash {
         Minecraft client = Minecraft.getInstance();
 
         // client.player nullability check to stop IDE complaints (be safe out there!)
-        if(client.player != null && client.level != null) {
+        if (client.player != null && client.level != null) {
             if (DreamBlock.isInDreamBlock(client.player)) {
                 dreamBlockTick++;
                 if (dreamBlockTick == 1) {
@@ -57,7 +57,7 @@ public class Dash {
                 isInDreamBlock = false;
             }
 
-            if (EstrogenConfig.client().chestPhysics.get()) {
+            if (client.level != null && EstrogenConfig.client().chestPhysicsRendering.get()) {
                 for (HashMap.Entry<UUID, Physics> physics : physicsMap.entrySet()) {
                     Player player = client.level.getPlayerByUUID(physics.getKey());
                     if (player != null && player.hasEffect(EstrogenEffects.ESTROGEN_EFFECT.get())) {
@@ -70,17 +70,17 @@ public class Dash {
                     }
                 }
             }
-        }
 
-        LocalPlayer player = client.player;
-        if (player == null) return;
+            LocalPlayer player = client.player;
+            if (player == null) return;
 
-        // UwU Check
-        tick++;
-        if (tick == 20) {
-            tick = 0;
-            uwufy = player.getInventory().contains(EstrogenTags.Items.UWUFYING);
-            client.updateTitle();
+            // UwU Check
+            tick++;
+            if (tick == 20) {
+                tick = 0;
+                uwufy = player.getInventory().contains(EstrogenTags.Items.UWUFYING);
+                client.updateTitle();
+            }
         }
     }
 
